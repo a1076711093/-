@@ -183,78 +183,85 @@
             font-weight: bold;
         }
 
-        /* --- 手机端适配：针对最大宽度768px的屏幕 --- */
-        @media (max-width: 768px) {
+        /* --- 针对 iPhone 11 及类似尺寸的手机端适配 (更紧凑) --- */
+        @media (max-width: 768px) { /* 此媒体查询范围覆盖 iPhone 11 */
             body {
-                margin: 10px auto; /* 进一步减小整体页边距 */
-                padding: 5px;     /* 进一步减小内边距 */
+                margin: 5px auto; /* 极小化页边距 */
+                padding: 0;       /* 移除 body padding，让内容更贴边 */
             }
 
             .calculator {
-                padding: 10px; /* 进一步减小计算器主体的内边距 */
+                padding: 8px; /* 极小化计算器主体的内边距 */
+                border-radius: 0; /* 移除圆角，让内容更贴合屏幕边缘 */
+                box-shadow: none; /* 移除阴影，减少视觉负担 */
             }
 
             .calculator h2 {
-                margin: -10px -10px 10px; /* 调整标题外边距以匹配新内边距 */
-                padding: 10px;            /* 进一步减小标题内边距 */
-                font-size: 18px;          /* 略微减小标题字号 */
+                margin: -8px -8px 8px; /* 调整标题外边距以匹配新内边距 */
+                padding: 10px;          /* 略微减小标题内边距 */
+                font-size: 17px;        /* 略微减小标题字号 */
+                border-radius: 0;       /* 移除圆角 */
             }
 
             .mode-selection {
-                margin-bottom: 10px; /* 减小模式选择区底部外边距 */
+                margin-bottom: 8px; /* 减小模式选择区底部外边距 */
             }
 
             .mode-selection button {
-                padding: 6px 12px; /* 进一步减小按钮内边距 */
-                margin: 0 3px;     /* 进一步减小按钮间距 */
-                font-size: 13px;   /* 进一步减小按钮字号 */
+                padding: 5px 10px; /* 进一步减小按钮内边距 */
+                margin: 0 2px;     /* 进一步减小按钮间距 */
+                font-size: 12px;   /* 进一步减小按钮字号 */
             }
 
             .calculator-content {
-                grid-template-columns: 1fr; /* 手机端改为单列布局 */
-                gap: 10px; /* 减小输入和结果区之间的间距 */
+                gap: 8px;   /* 减小输入和结果区之间的间距 */
                 padding: 5px; /* 减小内容区域的内边距 */
             }
 
             .input-section, .result-section {
-                padding: 10px; /* 减小输入/结果区域的内边距 */
+                padding: 8px; /* 减小输入/结果区域的内边距 */
+                background: none; /* 移除背景色，减少视觉分层 */
+                box-shadow: none; /* 移除阴影 */
+                border: none; /* 移除边框 */
             }
 
             .input-group {
-                margin-bottom: 10px; /* 减小输入组之间的垂直间距 */
+                margin-bottom: 8px; /* 进一步减小输入组之间的垂直间距 */
             }
 
             label {
-                margin-bottom: 3px; /* 进一步减小标签底部外边距 */
-                font-size: 14px;    /* 略微减小标签字号 */
+                margin-bottom: 2px; /* 极小化标签底部外边距 */
+                font-size: 13px;    /* 进一步减小标签字号 */
             }
 
             /* 确保输入框在手机端有足够高度，避免自动缩放，同时尽可能紧凑 */
             input {
-                padding: 8px;     /* 略微减小输入框内边距 */
-                font-size: 16px;  /* 保持16px或更大，避免手机浏览器自动缩放 */
+                padding: 6px;     /* 极小化输入框内边距 */
+                font-size: 16px;  /* 保持16px或更大，防止手机浏览器自动缩放 */
             }
 
             .sell-price-input-group {
-                gap: 3px; /* 进一步减小卖出价格输入组内部元素间距 */
+                gap: 2px; /* 极小化卖出价格输入组内部元素间距 */
             }
 
             .sell-price-input-group .toggle-buttons button {
-                padding: 4px 8px; /* 进一步减小切换按钮的内边距 */
-                font-size: 12px;   /* 进一步减小切换按钮字号 */
+                padding: 3px 6px; /* 极小化切换按钮的内边距 */
+                font-size: 11px;   /* 极小化切换按钮字号 */
             }
 
             .price-info-display {
-                font-size: 11px; /* 进一步减小提示信息字号 */
-                margin-top: 3px; /* 减小顶部外边距 */
+                font-size: 10px; /* 极小化提示信息字号 */
+                margin-top: 2px; /* 极小化顶部外边距 */
                 padding-left: 0; /* 移除左侧内边距 */
-                min-height: 18px; /* 略微减小最小高度 */
+                min-height: 16px; /* 进一步减小最小高度 */
             }
 
             .result div {
-                margin-bottom: 5px; /* 进一步减小结果项之间的垂直间距 */
-                padding: 6px;     /* 进一步减小结果项内边距 */
-                font-size: 13px;  /* 略微减小结果字号 */
+                margin-bottom: 4px; /* 极小化结果项之间的垂直间距 */
+                padding: 5px;     /* 极小化结果项内边距 */
+                font-size: 12px;  /* 进一步减小结果字号 */
+                background: none; /* 移除背景色 */
+                border: none; /* 移除边框 */
             }
         }
     </style>
