@@ -183,85 +183,105 @@
             font-weight: bold;
         }
 
-        /* --- 针对 iPhone 11 及类似尺寸的手机端适配 (更紧凑) --- */
-        @media (max-width: 768px) { /* 此媒体查询范围覆盖 iPhone 11 */
+        /* --- 手机端适配：针对最大宽度768px的屏幕 --- */
+        @media (max-width: 768px) {
             body {
-                margin: 5px auto; /* 极小化页边距 */
-                padding: 0;       /* 移除 body padding，让内容更贴边 */
+                margin: 10px auto; /* 恢复略宽松的整体页边距 */
+                padding: 5px;     /* 恢复略宽松的内边距 */
             }
 
             .calculator {
-                padding: 8px; /* 极小化计算器主体的内边距 */
-                border-radius: 0; /* 移除圆角，让内容更贴合屏幕边缘 */
-                box-shadow: none; /* 移除阴影，减少视觉负担 */
+                padding: 10px; /* 恢复计算器主体的内边距 */
+                border-radius: 8px; /* 恢复圆角 */
+                box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1); /* 恢复阴影 */
             }
 
             .calculator h2 {
-                margin: -8px -8px 8px; /* 调整标题外边距以匹配新内边距 */
-                padding: 10px;          /* 略微减小标题内边距 */
-                font-size: 17px;        /* 略微减小标题字号 */
-                border-radius: 0;       /* 移除圆角 */
+                margin: -10px -10px 10px; /* 调整标题外边距以匹配内边距 */
+                padding: 10px;            /* 恢复标题内边距 */
+                font-size: 18px;          /* 恢复标题字号 */
+                border-radius: 8px 8px 0 0; /* 恢复圆角 */
             }
 
             .mode-selection {
-                margin-bottom: 8px; /* 减小模式选择区底部外边距 */
+                margin-bottom: 10px; /* 恢复模式选择区底部外边距 */
             }
 
             .mode-selection button {
-                padding: 5px 10px; /* 进一步减小按钮内边距 */
-                margin: 0 2px;     /* 进一步减小按钮间距 */
-                font-size: 12px;   /* 进一步减小按钮字号 */
+                padding: 6px 12px; /* 恢复按钮内边距 */
+                margin: 0 3px;     /* 恢复按钮间距 */
+                font-size: 13px;   /* 恢复按钮字号 */
             }
 
             .calculator-content {
-                gap: 8px;   /* 减小输入和结果区之间的间距 */
-                padding: 5px; /* 减小内容区域的内边距 */
+                grid-template-columns: 1fr; /* 手机端依然单列布局 */
+                gap: 10px; /* 恢复输入和结果区之间的间距 */
+                padding: 5px; /* 恢复内容区域的内边距 */
             }
 
-            .input-section, .result-section {
-                padding: 8px; /* 减小输入/结果区域的内边距 */
-                background: none; /* 移除背景色，减少视觉分层 */
-                box-shadow: none; /* 移除阴影 */
-                border: none; /* 移除边框 */
+            /* 保持 input-section 有背景和圆角，让它看起来是一个独立的块 */
+            .input-section {
+                padding: 10px;
+                background: #f8f9fa;
+                border-radius: 8px;
+            }
+
+            /* result-section 保持简洁 */
+            .result-section {
+                padding: 10px;
+                background: none; /* 移除背景色 */
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
             }
 
             .input-group {
-                margin-bottom: 8px; /* 进一步减小输入组之间的垂直间距 */
+                margin-bottom: 10px; /* 恢复输入组之间的垂直间距 */
             }
 
             label {
-                margin-bottom: 2px; /* 极小化标签底部外边距 */
-                font-size: 13px;    /* 进一步减小标签字号 */
+                margin-bottom: 3px; /* 恢复标签底部外边距 */
+                font-size: 14px;    /* 恢复标签字号 */
             }
 
-            /* 确保输入框在手机端有足够高度，避免自动缩放，同时尽可能紧凑 */
             input {
-                padding: 6px;     /* 极小化输入框内边距 */
-                font-size: 16px;  /* 保持16px或更大，防止手机浏览器自动缩放 */
+                padding: 8px;     /* 恢复输入框内边距 */
+                font-size: 16px;  /* 保持16px，防止手机浏览器自动缩放 */
             }
 
             .sell-price-input-group {
-                gap: 2px; /* 极小化卖出价格输入组内部元素间距 */
+                gap: 3px; /* 恢复卖出价格输入组内部元素间距 */
             }
 
             .sell-price-input-group .toggle-buttons button {
-                padding: 3px 6px; /* 极小化切换按钮的内边距 */
-                font-size: 11px;   /* 极小化切换按钮字号 */
+                padding: 4px 8px; /* 恢复切换按钮的内边距 */
+                font-size: 12px;   /* 恢复切换按钮字号 */
             }
 
             .price-info-display {
-                font-size: 10px; /* 极小化提示信息字号 */
-                margin-top: 2px; /* 极小化顶部外边距 */
-                padding-left: 0; /* 移除左侧内边距 */
-                min-height: 16px; /* 进一步减小最小高度 */
+                font-size: 11px; /* 恢复提示信息字号 */
+                margin-top: 3px; /* 恢复顶部外边距 */
+                padding-left: 0; /* 保持无左侧内边距 */
+                min-height: 18px; /* 恢复最小高度 */
             }
 
+            /* 针对 .result div 的基础样式，不包含 net-profit-summary */
             .result div {
-                margin-bottom: 4px; /* 极小化结果项之间的垂直间距 */
-                padding: 5px;     /* 极小化结果项内边距 */
-                font-size: 12px;  /* 进一步减小结果字号 */
-                background: none; /* 移除背景色 */
-                border: none; /* 移除边框 */
+                margin-bottom: 5px; /* 恢复结果项之间的垂直间距 */
+                padding: 6px;     /* 恢复结果项内边距 */
+                font-size: 13px;  /* 恢复结果字号 */
+                background: none; /* 移除背景色，使其更简洁 */
+                border: none;     /* 移除边框，使其更简洁 */
+            }
+
+            /* 净收益的突出样式 */
+            .net-profit-summary {
+                margin-bottom: 15px; /* 给予净收益一个更明显的底部外边距，与下方详情区分 */
+                padding: 10px;       /* 稍微大一点的内边距 */
+                font-size: 16px;     /* 突出显示字体 */
+                background: white;   /* 增加背景色使其突出 */
+                border: 1px solid #ebeef5; /* 增加边框 */
+                border-radius: 4px;  /* 恢复圆角 */
             }
         }
     </style>
@@ -339,6 +359,8 @@
 
             <div class="result-section">
                 <div class="result">
+                    <div class="net-profit-summary profit">净收益：<span id="netProfit">0.00</span> 元</div>
+
                     <div id="displayBuyAmount">买入金额：<span id="buyAmount">0.00</span> 元</div>
                     <div id="displaySellAmount">卖出金额：<span id="sellAmount">0.00</span> 元</div>
                     <div id="displayGrossProfit">普通交易毛利：<span id="grossProfit">0.00</span> 元</div>
@@ -347,7 +369,6 @@
                     <div>卖出佣金：<span id="sellCommission">0.00</span> 元</div>
                     <div id="displayStampTax">印花税：<span id="stampTax">0.00</span> 元</div>
                     <div>总费用：<span id="totalFee">0.00</span> 元</div>
-                    <div class="profit">净收益：<span id="netProfit">0.00</span> 元</div>
                 </div>
             </div>
         </div>
@@ -374,7 +395,7 @@
             sellCommission: document.getElementById('sellCommission'),
             stampTax: document.getElementById('stampTax'),
             totalFee: document.getElementById('totalFee'),
-            netProfit: document.getElementById('netProfit'),
+            netProfit: document.getElementById('netProfit'), // 净收益的span
             displayGrossProfitDiv: document.getElementById('displayGrossProfit'),
             displayBuyAmountDiv: document.getElementById('displayBuyAmount'),
             displaySellAmountDiv: document.getElementById('displaySellAmount'),
@@ -498,8 +519,12 @@
             displayElements.totalFee.textContent = totalFee.toFixed(2);
 
             displayElements.netProfit.textContent = netProfit.toFixed(2);
-            // 净收益颜色：赚红亏绿
-            displayElements.netProfit.className = netProfit >= 0 ? 'profit' : 'negative';
+            // 净收益的父 div (现在是类名为 'net-profit-summary' 的 div) 也要根据净收益值改变颜色
+            const netProfitSummaryDiv = document.querySelector('.net-profit-summary');
+            if (netProfitSummaryDiv) {
+                netProfitSummaryDiv.classList.remove('profit', 'negative'); // 移除旧的颜色类
+                netProfitSummaryDiv.classList.add(netProfit >= 0 ? 'profit' : 'negative'); // 添加新的颜色类
+            }
         }
 
         // 切换卖出价格输入模式的函数
