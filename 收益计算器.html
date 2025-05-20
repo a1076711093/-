@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>收益计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .calculator {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
+        }
+        .calculator h2 {
+            text-align: center;
+            color: white;
+            background: linear-gradient(135deg, #1989fa, #5cadff);
+            margin: -20px -20px 20px;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+        }
+        .mode-selection {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .mode-selection button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: 1px solid #1989fa;
+            border-radius: 5px;
+            background-color: white;
+            color: #1989fa;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .mode-selection button.active {
+            background-color: #1989fa;
+            color: white;
+        }
+        .mode-selection button:hover:not(.active) {
+            background-color: #e6f7ff;
+        }
+
+        .calculator-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 20px;
+        }
+        .input-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .result-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #303133;
+        }
+        input {
+            width: calc(100% - 20px);
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .unit {
+            margin-left: 8px;
+            color: #606266;
+        }
+        .price-change-info {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            color: #606266;
+            font-size: 14px;
+        }
+        .result div {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ebeef5;
+        }
+        /* 净收益颜色：赚红亏绿 */
+        .profit {
+            color: #f56c6c; /* 盈利用红色 */
+            font-weight: bold;
+        }
+        .negative {
+            color: #67c23a; /* 亏损用绿色 */
+            font-weight: bold;
+        }
+        /* 涨跌颜色：涨红跌绿 */
+        .price-increase {
+            color: #f56c6c; /* 红色表示上涨 */
+            font-weight: bold;
+        }
+        .price-decrease {
+            color: #67c23a; /* 绿色表示下跌 */
+            font-weight: bold;
+        }
+        /* positive 类用于净收益为正时，现在也改为红色 */
+        .positive { /* 实际上这个类在JS里会被profit覆盖，但保留以防万一 */
+            color: #f56c6c;
+        }
+
+        /* 卖出价格输入模式切换样式 */
+        .sell-price-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .sell-price-input-group > div {
+            flex-grow: 1;
+        }
+        .sell-price-input-group .toggle-buttons {
+            display: flex;
+            flex-shrink: 0;
+        }
+        .sell-price-input-group .toggle-buttons button {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+        .sell-price-input-group .toggle-buttons button:first-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .sell-price-input-group .toggle-buttons button:last-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            margin-left: -1px;
+        }
+        .sell-price-input-group .toggle-buttons button.active {
+            background-color: #1989fa;
+            color: white;
+            border-color: #1989fa;
+        }
+        .sell-price-input-group .toggle-buttons button:hover:not(.active) {
+            background-color: #e6e6e6;
+        }
+
+        /* 新增的提示信息样式 */
+        .price-info-display {
+            font-size: 13px;
+            color: #606266;
+            margin-top: 5px;
+            padding-left: 5px;
+            min-height: 20px;
+        }
+        .price-info-display .highlight {
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .calculator-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>收益计算器</h2>
+        <div class="mode-selection">
+            <button id="modeNormal" class="active">普通交易</button>
+            <button id="modeT0">做T交易</button>
+        </div>
+        <div class="calculator-content">
+            <div class="input-section">
+                <div id="normalInputs">
+                    <div class="input-group">
+                        <label>买入价格（元）：</label>
+                        <input type="number" id="buyPriceNormal" step="0.01" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>卖出价格（元）：</label>
+                        <div class="sell-price-input-group">
+                            <input type="number" id="sellPriceNormal" step="0.01" min="0" class="price-input active">
+                            <input type="number" id="gainPercentageNormal" step="0.01" min="-100" style="display: none;" class="percentage-input">
+                            <span id="percentageUnitNormal" style="display: none;">%</span>
+                            <div class="toggle-buttons">
+                                <button id="togglePriceNormal" class="active">价格</button>
+                                <button id="togglePercentageNormal">涨幅</button>
+                            </div>
+                        </div>
+                        <div id="normalPriceInfo" class="price-info-display"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>交易数量（股）：</label>
+                        <input type="number" id="quantityNormal" step="100" min="100">
+                    </div>
+                </div>
+
+                <div id="t0Inputs" style="display: none;">
+                    <div class="input-group">
+                        <label>卖出价格（元）：</label>
+                        <div class="sell-price-input-group">
+                            <input type="number" id="sellPriceT0" step="0.01" min="0" class="price-input active">
+                            <input type="number" id="gainPercentageT0" step="0.01" min="-100" style="display: none;" class="percentage-input">
+                            <span id="percentageUnitT0" style="display: none;">%</span>
+                            <div class="toggle-buttons">
+                                <button id="togglePriceT0" class="active">价格</button>
+                                <button id="togglePercentageT0">涨幅</button>
+                            </div>
+                        </div>
+                        <div id="t0PriceInfo" class="price-info-display"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>卖出数量（股）：</label>
+                        <input type="number" id="sellQuantityT0" step="100" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>买入价格（元）：</label>
+                        <input type="number" id="buyPriceT0" step="0.01" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>买入数量（股）：</label>
+                        <input type="number" id="buyQuantityT0" step="100" min="0">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>佣金费率（%）：</label>
+                    <input type="number" id="commission" step="0.001" value="0.025">
+                </div>
+                <div class="input-group" id="stampTaxInputGroup">
+                    <label>印花税率（%）：</label>
+                    <input type="number" id="stampTaxRate" step="0.001" value="0.1">
+                </div>
+            </div>
+
+            <div class="result-section">
+                <div class="result">
+                    <div id="displayBuyAmount">买入金额：<span id="buyAmount">0.00</span> 元</div>
+                    <div id="displaySellAmount">卖出金额：<span id="sellAmount">0.00</span> 元</div>
+                    <div id="displayGrossProfit">普通交易毛利：<span id="grossProfit">0.00</span> 元</div>
+                    <div id="displayT0ProfitBase">做T差价部分利润：<span id="t0ProfitBase">0.00</span> 元</div>
+                    <div>买入佣金：<span id="buyCommission">0.00</span> 元</div>
+                    <div>卖出佣金：<span id="sellCommission">0.00</span> 元</div>
+                    <div id="displayStampTax">印花税：<span id="stampTax">0.00</span> 元</div>
+                    <div>总费用：<span id="totalFee">0.00</span> 元</div>
+                    <div class="profit">净收益：<span id="netProfit">0.00</span> 元</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 定义全局变量和缓存DOM元素
+        let currentMode = 'normal';
+        let sellPriceInputModeNormal = 'price';
+        let sellPriceInputModeT0 = 'price';
+
+        // 缓存常用的DOM元素
+        const modeNormalBtn = document.getElementById('modeNormal');
+        const modeT0Btn = document.getElementById('modeT0');
+        const normalInputsDiv = document.getElementById('normalInputs');
+        const t0InputsDiv = document.getElementById('t0Inputs');
+
+        const displayElements = {
+            buyAmount: document.getElementById('buyAmount'),
+            sellAmount: document.getElementById('sellAmount'),
+            grossProfit: document.getElementById('grossProfit'),
+            t0ProfitBase: document.getElementById('t0ProfitBase'),
+            buyCommission: document.getElementById('buyCommission'),
+            sellCommission: document.getElementById('sellCommission'),
+            stampTax: document.getElementById('stampTax'),
+            totalFee: document.getElementById('totalFee'),
+            netProfit: document.getElementById('netProfit'),
+            displayGrossProfitDiv: document.getElementById('displayGrossProfit'),
+            displayBuyAmountDiv: document.getElementById('displayBuyAmount'),
+            displaySellAmountDiv: document.getElementById('displaySellAmount'),
+            displayT0ProfitBaseDiv: document.getElementById('displayT0ProfitBase')
+        };
+
+        // 辅助函数：获取输入框的数值
+        function getNumValue(id) {
+            return parseFloat(document.getElementById(id).value) || 0;
+        }
+
+        // 辅助函数：获取输入框的整数值
+        function getIntValue(id) {
+            return parseInt(document.getElementById(id).value) || 0;
+        }
+
+        // 辅助函数：更新涨幅信息显示（涨红跌绿）
+        function updatePriceInfoDisplay(buyPrice, sellPrice, gainPercentageElementId, infoDisplayElementId) {
+            const infoDisplayElement = document.getElementById(infoDisplayElementId);
+            if (buyPrice > 0) {
+                const calculatedPercentage = ((sellPrice - buyPrice) / buyPrice) * 100;
+                const calculatedGainAmount = sellPrice - buyPrice;
+                const colorClass = calculatedPercentage >= 0 ? 'price-increase' : 'price-decrease';
+                infoDisplayElement.innerHTML = `涨幅: <span class="${colorClass}">${calculatedPercentage.toFixed(2)}%</span>, 涨幅金额: <span class="${colorClass}">${calculatedGainAmount.toFixed(2)}</span> 元`;
+                document.getElementById(gainPercentageElementId).value = calculatedPercentage.toFixed(2); // 更新隐藏的涨幅输入框
+            } else {
+                infoDisplayElement.textContent = "请输入买入价格以计算涨幅。";
+            }
+        }
+
+        function calculate() {
+            const commissionRate = getNumValue('commission');
+            const stampTaxRate = getNumValue('stampTaxRate');
+
+            let buyPrice, sellPrice, buyQuantity, sellQuantity;
+            let currentSellPriceInputMode;
+            let priceInfoElementId;
+            let gainPercentageElementId;
+            let sellPriceElementId;
+
+            // 根据当前模式设置变量和显示项
+            if (currentMode === 'normal') {
+                buyPrice = getNumValue('buyPriceNormal');
+                const commonQuantity = getIntValue('quantityNormal');
+                buyQuantity = commonQuantity;
+                sellQuantity = commonQuantity;
+                currentSellPriceInputMode = sellPriceInputModeNormal;
+                priceInfoElementId = 'normalPriceInfo';
+                gainPercentageElementId = 'gainPercentageNormal';
+                sellPriceElementId = 'sellPriceNormal';
+
+                // 显隐相关结果项
+                displayElements.displayGrossProfitDiv.style.display = 'block';
+                displayElements.displayBuyAmountDiv.style.display = 'block';
+                displayElements.displaySellAmountDiv.style.display = 'block';
+                displayElements.displayT0ProfitBaseDiv.style.display = 'none';
+
+            } else { // t0 模式
+                buyPrice = getNumValue('buyPriceT0');
+                sellQuantity = getIntValue('sellQuantityT0');
+                buyQuantity = getIntValue('buyQuantityT0');
+                currentSellPriceInputMode = sellPriceInputModeT0;
+                priceInfoElementId = 't0PriceInfo';
+                gainPercentageElementId = 'gainPercentageT0';
+                sellPriceElementId = 'sellPriceT0';
+
+                // 显隐相关结果项
+                displayElements.displayGrossProfitDiv.style.display = 'none';
+                displayElements.displayBuyAmountDiv.style.display = 'none';
+                displayElements.displaySellAmountDiv.style.display = 'none';
+                displayElements.displayT0ProfitBaseDiv.style.display = 'block';
+            }
+
+            // 根据卖出价格输入模式获取实际卖出价格
+            if (currentSellPriceInputMode === 'price') {
+                sellPrice = getNumValue(sellPriceElementId);
+            } else { // percentage mode
+                const gainPercentage = getNumValue(gainPercentageElementId);
+                sellPrice = buyPrice * (1 + gainPercentage / 100);
+                // 确保更新了直接价格输入框的值，即使它是隐藏的
+                document.getElementById(sellPriceElementId).value = sellPrice.toFixed(2);
+            }
+
+            // 更新价格信息显示
+            updatePriceInfoDisplay(buyPrice, sellPrice, gainPercentageElementId, priceInfoElementId);
+
+            // 计算交易金额和费用 (这部分逻辑对两种模式是通用的)
+            const buyAmount = buyPrice * buyQuantity;
+            const sellAmount = sellPrice * sellQuantity;
+
+            let buyCommission = Math.max(buyAmount * commissionRate / 100, 5); // 买入佣金，最低5元
+            let sellCommission = Math.max(sellAmount * commissionRate / 100, 5); // 卖出佣金，最低5元
+            const stampTax = sellAmount * (stampTaxRate / 100); // 印花税，卖出时收取
+
+            const totalFee = buyCommission + sellCommission + stampTax;
+
+            let netProfit;
+            let grossProfitNormal = 0;
+            let t0ProfitBase = 0;
+
+            // 根据模式计算毛利和净收益
+            if (currentMode === 'normal') {
+                grossProfitNormal = sellAmount - buyAmount;
+                netProfit = grossProfitNormal - totalFee;
+            } else {
+                // 做T差价部分利润，取买入和卖出数量的最小值来计算差价
+                const t0ProcessedQuantity = Math.min(buyQuantity, sellQuantity);
+                t0ProfitBase = (sellPrice - buyPrice) * t0ProcessedQuantity;
+                // 做T的净收益
+                netProfit = t0ProfitBase - totalFee;
+            }
+
+            // 更新结果显示到页面
+            displayElements.buyAmount.textContent = buyAmount.toFixed(2);
+            displayElements.sellAmount.textContent = sellAmount.toFixed(2);
+            displayElements.grossProfit.textContent = grossProfitNormal.toFixed(2);
+            displayElements.t0ProfitBase.textContent = t0ProfitBase.toFixed(2);
+            displayElements.buyCommission.textContent = buyCommission.toFixed(2);
+            displayElements.sellCommission.textContent = sellCommission.toFixed(2);
+            displayElements.stampTax.textContent = stampTax.toFixed(2);
+            displayElements.totalFee.textContent = totalFee.toFixed(2);
+
+            displayElements.netProfit.textContent = netProfit.toFixed(2);
+            // 净收益颜色：赚红亏绿
+            displayElements.netProfit.className = netProfit >= 0 ? 'profit' : 'negative';
+        }
+
+        // 切换卖出价格输入模式的函数
+        function toggleSellPriceInput(modePrefix, inputMode) {
+            const priceInput = document.getElementById(`sellPrice${modePrefix}`);
+            const percentageInput = document.getElementById(`gainPercentage${modePrefix}`);
+            const percentageUnit = document.getElementById(`percentageUnit${modePrefix}`);
+            const togglePriceBtn = document.getElementById(`togglePrice${modePrefix}`);
+            const togglePercentageBtn = document.getElementById(`togglePercentage${modePrefix}`);
+
+            if (modePrefix === 'Normal') {
+                sellPriceInputModeNormal = inputMode;
+            } else { // T0
+                sellPriceInputModeT0 = inputMode;
+            }
+
+            if (inputMode === 'price') {
+                priceInput.style.display = 'block';
+                percentageInput.style.display = 'none';
+                percentageUnit.style.display = 'none';
+                togglePriceBtn.classList.add('active');
+                togglePercentageBtn.classList.remove('active');
+                priceInput.focus();
+            } else { // percentage
+                priceInput.style.display = 'none';
+                percentageInput.style.display = 'block';
+                percentageUnit.style.display = 'inline';
+                togglePriceBtn.classList.remove('active');
+                togglePercentageBtn.classList.add('active');
+                percentageInput.focus();
+            }
+            calculate(); // 切换模式后重新计算
+        }
+
+        // 切换主交易模式的函数
+        function switchMode(mode) {
+            currentMode = mode;
+
+            modeNormalBtn.classList.remove('active');
+            modeT0Btn.classList.remove('active');
+
+            if (mode === 'normal') {
+                modeNormalBtn.classList.add('active');
+                normalInputsDiv.style.display = 'block';
+                t0InputsDiv.style.display = 'none';
+                // 确保切换回普通模式时，卖出价格输入模式保持上一次的状态
+                toggleSellPriceInput('Normal', sellPriceInputModeNormal);
+            } else {
+                modeT0Btn.classList.add('active');
+                normalInputsDiv.style.display = 'none';
+                t0InputsDiv.style.display = 'block';
+                // 确保切换到做T模式时，卖出价格输入模式保持上一次的状态
+                toggleSellPriceInput('T0', sellPriceInputModeT0);
+            }
+            calculate(); // 模式切换后立即计算
+        }
+
+        // 页面加载完成后执行初始化和事件绑定
+        document.addEventListener('DOMContentLoaded', () => {
+            // 绑定模式切换按钮
+            modeNormalBtn.addEventListener('click', () => switchMode('normal'));
+            modeT0Btn.addEventListener('click', () => switchMode('t0'));
+
+            // 绑定普通交易模式的卖出价格/涨幅切换按钮
+            document.getElementById('togglePriceNormal').addEventListener('click', () => toggleSellPriceInput('Normal', 'price'));
+            document.getElementById('togglePercentageNormal').addEventListener('click', () => toggleSellPriceInput('Normal', 'percentage'));
+
+            // 绑定做T交易模式的卖出价格/涨幅切换按钮
+            document.getElementById('togglePriceT0').addEventListener('click', () => toggleSellPriceInput('T0', 'price'));
+            document.getElementById('togglePercentageT0').addEventListener('click', () => toggleSellPriceInput('T0', 'percentage'));
+
+            // 统一绑定所有数字输入框的input事件，当任何一个输入框内容变化时都重新计算
+            document.querySelectorAll('.input-section input[type="number"]').forEach(input => {
+                input.addEventListener('input', calculate);
+            });
+
+            // 初始化显示为普通交易模式
+            switchMode('normal');
+        });
+    </script>
+</body>
+</html>
