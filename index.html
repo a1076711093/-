@@ -415,14 +415,24 @@
         // 辅助函数：更新涨幅信息显示（涨红跌绿）
         function updatePriceInfoDisplay(buyPrice, sellPrice, gainPercentageElementId, infoDisplayElementId) {
             const infoDisplayElement = document.getElementById(infoDisplayElementId);
+            const gainPercentageInput = document.getElementById(gainPercentageElementId);
+
             if (buyPrice > 0) {
                 const calculatedPercentage = ((sellPrice - buyPrice) / buyPrice) * 100;
                 const calculatedGainAmount = sellPrice - buyPrice;
                 const colorClass = calculatedPercentage >= 0 ? 'price-increase' : 'price-decrease';
                 infoDisplayElement.innerHTML = `涨幅: <span class="${colorClass}">${calculatedPercentage.toFixed(2)}%</span>, 涨幅金额: <span class="${colorClass}">${calculatedGainAmount.toFixed(2)}</span> 元`;
-                document.getElementById(gainPercentageElementId).value = calculatedPercentage.toFixed(2); // 更新隐藏的涨幅输入框
+                
+                // 仅当用户正在输入价格模式时，才更新涨幅输入框的值
+                // 如果当前是涨幅模式，则用户直接输入，不应该被计算值覆盖
+                if (currentMode === 'normal' && sellPriceInputModeNormal === 'price' ||
+                    currentMode === 't0' && sellPriceInputModeT0 === 'price') {
+                    gainPercentageInput.value = calculatedPercentage.toFixed(2);
+                }
             } else {
                 infoDisplayElement.textContent = "请输入买入价格以计算涨幅。";
+                // 当买入价格为0时，清空涨幅输入框
+                gainPercentageInput.value = '';
             }
         }
 
@@ -479,8 +489,9 @@
                 document.getElementById(sellPriceElementId).value = sellPrice.toFixed(2);
             }
 
-            // 更新价格信息显示
+            // 更新价格信息显示，现在在计算卖出价格之后才更新
             updatePriceInfoDisplay(buyPrice, sellPrice, gainPercentageElementId, priceInfoElementId);
+
 
             // 计算交易金额和费用 (这部分逻辑对两种模式是通用的)
             const buyAmount = buyPrice * buyQuantity;
@@ -549,11 +560,23 @@
                 togglePercentageBtn.classList.remove('active');
                 priceInput.focus();
             } else { // percentage
-                priceInput.style.display = 'none';
-                percentageInput.style.display = 'block';
-                percentageUnit.style.display = 'inline';
+                priceInput.style.display = 'block'; // 保持 block，而不是 none
+                percentageInput.style.display = 'block'; // 确保显示
+                percentageUnit.style.display = 'inline'; // 确保显示
                 togglePriceBtn.classList.remove('active');
                 togglePercentageBtn.classList.add('active');
+                
+                // 为了让百分比输入框能够输入，我们需要隐藏价格输入框，
+                // 但为了避免布局跳动，我们将价格输入框的宽度设为0而不是完全隐藏。
+                // 这样只显示百分比输入框。
+                priceInput.style.width = '0';
+                priceInput.style.padding = '0';
+                priceInput.style.border = 'none';
+                
+                percentageInput.style.width = '100%'; // 确保百分比输入框占据空间
+                percentageInput.style.padding = '8px';
+                percentageInput.style.border = '1px solid #ddd';
+
                 percentageInput.focus();
             }
             calculate(); // 切换模式后重新计算
